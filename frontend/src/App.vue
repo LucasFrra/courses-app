@@ -1,6 +1,12 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import { onMounted } from 'vue'
+import { pingBackend } from './composables/useApi.js'
+
+onMounted(() => {
+  pingBackend()
+})
 </script>
+
 
 <template>
   <div>
