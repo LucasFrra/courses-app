@@ -1,86 +1,58 @@
 <template>
-    <div class="register-view">
-        <h1>Register</h1>
-        <form @submit.prevent="handleRegister">
-            <div>
-                <label for="username">Username:</label>
-                <input type="text" id="username" v-model="form.username" required />
-            </div>
-            <div>
-                <label for="email">Email:</label>
-                <input type="email" id="email" v-model="form.email" required />
-            </div>
-            <div>
-                <label for="password">Password:</label>
-                <input type="password" id="password" v-model="form.password" required />
-            </div>
-            <button type="submit">Register</button>
-        </form>
+    <div class="min-h-screen flex flex-col items-center justify-center gap-4 bg-gray-100">
+      <h1 class="text-2xl font-bold text-purple-700">Inscription</h1>
+  
+      <form @submit.prevent="register" class="flex flex-col gap-2 w-64">
+        <input v-model="email" type="email" placeholder="Email" class="p-2 border rounded" />
+        <input v-model="password" type="password" placeholder="Mot de passe" class="p-2 border rounded" />
+        <input v-model="passwordConfirmation" type="password" placeholder="Confirmer le mot de passe" class="p-2 border rounded" />
+        <button class="bg-purple-600 text-white p-2 rounded">S'inscrire</button>
+      </form>
+  
+      <p v-if="user">Bienvenue, {{ user.email }}</p>
     </div>
-</template>
-
-<script>
-export default {
-    name: "RegisterView",
-    data() {
-        return {
-            form: {
-                username: "",
-                email: "",
-                password: "",
-            },
-        };
-    },
-    methods: {
-        handleRegister() {
-            console.log("Form submitted:", this.form);
-            // Add your registration logic here
-        },
-    },
-};
-</script>
-
-<style scoped>
-.register-view {
-    max-width: 400px;
-    margin: 0 auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-}
-
-.register-view h1 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.register-view form div {
-    margin-bottom: 15px;
-}
-
-.register-view label {
-    display: block;
-    margin-bottom: 5px;
-}
-
-.register-view input {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-}
-
-.register-view button {
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.register-view button:hover {
-    background-color: #0056b3;
-}
-</style>
+  </template>
+  
+  <script setup>
+  import { ref } from 'vue'
+  
+  const email = ref('')
+  const password = ref('')
+  const passwordConfirmation = ref('')
+  const user = ref(null)
+  
+  const register = async () => {
+    await fetch('http://localhost:8000/sanctum/csrf-cookie', {
+      credentials: 'include',
+    })
+  
+    const res = await fetch('http://localhost:8000/api/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        email: email.value,
+        password: password.value,
+        password_confirmation: passwordConfirmation.value,
+      }),
+    })
+  
+    console.log("🚀 ~ register ~ res:", res)
+  
+    const data = await res.json()
+  
+    if (res.ok) {
+      user.value = data.user
+    } else {
+      alert(data.message || Object.values(data.errors || {}).flat().join('\n'))
+    }
+  }
+  </script>
+  
+  <style scoped>
+  </style>
+    

@@ -7,8 +7,17 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     async fetchUser() {
+      await fetch('http://localhost:8000/sanctum/csrf-cookie', {
+        credentials: 'include',
+      })
+      
       const res = await fetch('http://localhost:8000/api/user', {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json',
+        },
       })
 
       if (res.ok) {
